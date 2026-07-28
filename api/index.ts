@@ -229,11 +229,10 @@ async function sendEmail(htmlContent: string, userEmail?: string): Promise<{ suc
       toAddresses.push(userEmail.trim());
     }
 
-    const refId = Math.random().toString(36).substring(7).toUpperCase();
     await transporter.sendMail({
-      from: `"Sistema de Diagnóstico" <${SMTP_USER}>`,
+      from: `"André Rangel" <${SMTP_USER}>`,
       to: toAddresses.join(', '),
-      subject: `Novo Relatório de Diagnóstico Estratégico - Ref: ${refId}`,
+      subject: `André Rangel - Diagnóstico Inicial Estratégico`,
       html: htmlContent,
     });
     
