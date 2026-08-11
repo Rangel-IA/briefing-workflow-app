@@ -47,6 +47,15 @@ A atuação concentrou-se na estruturação do percurso de preenchimento, na hie
 - Estrutura preparada para evolução funcional e integração com novos fluxos
 - Implementação em stack web moderna
 
+## Stack, Integrações e Deploy
+- Aplicação construída em stack web moderna para captação, processamento e encaminhamento de informação
+- Integração com modelo de linguagem via API para análise preliminar das respostas
+- Camada de instrução sistémica aplicada à geração da leitura orientada do briefing
+- Fluxo de automação por e-mail para envio simultâneo do relatório ao lead e ao SDR
+- Estrutura preparada para evolução de integrações com CRM, pipeline comercial ou ferramentas de gestão
+- Publicação em ambiente web para utilização operacional em contexto real
+- Deploy realizado na Vercel
+
 ## Valor do Projeto
 Este projeto demonstra a capacidade de transformar uma etapa inicial geralmente informal em uma aplicação web funcional, com valor direto para organização, alinhamento e continuidade operacional. O seu valor está menos em “ser um formulário” e mais em estruturar uma fase crítica do processo, acrescentando análise preliminar orientada por IA, consolidação de contexto e encaminhamento automático para acelerar a qualidade da execução posterior.
 
