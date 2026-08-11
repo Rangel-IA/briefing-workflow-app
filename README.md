@@ -9,7 +9,7 @@ Transformar a fase de briefing em um fluxo digital mais consistente, capaz de ca
 ## Problema que Resolve
 Em muitos projetos, a etapa de briefing acontece de forma dispersa, informal ou pouco estruturada. Isso gera perda de contexto, retrabalho, desalinhamento entre expectativa e execução, além de dificultar a continuidade operacional da informação recolhida.
 
-Mesmo quando as respostas são obtidas, a leitura inicial do material costuma depender de interpretação manual, o que torna o processo mais lento e menos consistente para quem precisa avaliar rapidamente o projeto e dar seguimento comercial ou operacional.
+Mesmo quando as respostas são obtidas, a leitura inicial do material costuma depender de interpretação manual, o que torna o processo mais lento e menos consistente para quem precisa avaliar de maneira assertiva o projeto e dar seguimento comercial ou operacional de forma célere.
 
 Este projeto foi concebido para enfrentar esse problema por meio de uma aplicação web orientada a:
 - estruturação da entrada de informações
