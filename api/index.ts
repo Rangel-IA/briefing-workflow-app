@@ -6,14 +6,14 @@ import Groq from 'groq-sdk';
 const app = express();
 app.use(express.json());
 
-// Initialize Groq Client
-let groq: Groq | null = null;
-try {
-  if (process.env.GROQ_API_KEY) {
-    groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// Lazy Groq Client Helper
+function getGroqClient(): Groq | null {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    console.warn("[Groq] GROQ_API_KEY não encontrada nas variáveis de ambiente.");
+    return null;
   }
-} catch (e) {
-  console.warn("Failed to initialize Groq Client, check GROQ_API_KEY.");
+  return new Groq({ apiKey });
 }
 
 app.post('/api/submit-diagnosis', async (req, res) => {
@@ -25,7 +25,8 @@ app.post('/api/submit-diagnosis', async (req, res) => {
     }
 
     // Generate Analysis via Groq
-    let analysisText = 'Análise indisponível. Configure a chave da API (GROQ_API_KEY).';
+    let analysisText = '';
+    const groq = getGroqClient();
     
     if (groq) {
       const prompt = `Você atua como Arquiteto de Sistemas e Soluções e Estrategista Digital avaliando um prospect. 
@@ -42,32 +43,46 @@ app.post('/api/submit-diagnosis', async (req, res) => {
       Questionário e Respostas:
       ${JSON.stringify(answers, null, 2)}`;
       
+      const requestedModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+
       try {
-        const targetModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
-        console.log(`[Groq] Solicitando analise com modelo: ${targetModel}`);
+        console.log(`[Groq] Solicitando analise com modelo principal: ${requestedModel}`);
         const completion = await groq.chat.completions.create({
           messages: [{ role: 'user', content: prompt }],
-          model: targetModel,
+          model: requestedModel,
           max_completion_tokens: 2048,
         });
-        analysisText = completion.choices[0]?.message?.content || analysisText;
-      } catch (e: any) {
-        console.error("Groq Error:", e?.status, e?.message || e);
-        if (e.status === 429 || (e.message && e.message.includes('429'))) {
-           analysisText = "Análise automática indisponível no momento devido ao limite de requisições da IA. A análise será feita manualmente e enviada em breve.";
-        } else {
-           analysisText = "Análise automática temporariamente indisponível.";
+        analysisText = completion.choices[0]?.message?.content || '';
+      } catch (errPrincipal: any) {
+        console.error(`[Groq] Falha no modelo ${requestedModel}:`, errPrincipal?.status, errPrincipal?.message || errPrincipal);
+        
+        // Contingência imediata: se o modelo 120B falhar, utiliza o modelo ultrarrápido disponível em todas as contas
+        try {
+          console.log('[Groq] Executando contingencia com llama-3.1-8b-instant...');
+          const fallback = await groq.chat.completions.create({
+            messages: [{ role: 'user', content: prompt }],
+            model: 'llama-3.1-8b-instant',
+            max_completion_tokens: 1500,
+          });
+          analysisText = fallback.choices[0]?.message?.content || '';
+        } catch (errFallback: any) {
+          console.error('[Groq] Falha tambem no modelo de contingencia:', errFallback?.status, errFallback?.message || errFallback);
+          const msg = errPrincipal?.message || errPrincipal?.error?.message || 'Erro de comunicação com a API.';
+          analysisText = `Análise automática indisponível no momento.\n[Diagnóstico Groq: ${msg}]`;
         }
       }
+    } else {
+      analysisText = 'Análise indisponível: Chave GROQ_API_KEY não configurada no ambiente da Vercel.';
+    }
 
     // Format Email Content
     const dateStr = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
     
     const formattedAnalysis = analysisText
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>');
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
   
-  let emailContent = `
+    let emailContent = `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
