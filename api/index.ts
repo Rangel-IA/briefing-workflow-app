@@ -43,20 +43,22 @@ app.post('/api/submit-diagnosis', async (req, res) => {
       ${JSON.stringify(answers, null, 2)}`;
       
       try {
+        const targetModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+        console.log(`[Groq] Solicitando analise com modelo: ${targetModel}`);
         const completion = await groq.chat.completions.create({
           messages: [{ role: 'user', content: prompt }],
-          model: 'llama-3.3-70b-versatile',
+          model: targetModel,
+          max_completion_tokens: 2048,
         });
         analysisText = completion.choices[0]?.message?.content || analysisText;
       } catch (e: any) {
-        console.error("Groq Error:", e);
+        console.error("Groq Error:", e?.status, e?.message || e);
         if (e.status === 429 || (e.message && e.message.includes('429'))) {
            analysisText = "Análise automática indisponível no momento devido ao limite de requisições da IA. A análise será feita manualmente e enviada em breve.";
         } else {
            analysisText = "Análise automática temporariamente indisponível.";
         }
       }
-    }
 
     // Format Email Content
     const dateStr = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
